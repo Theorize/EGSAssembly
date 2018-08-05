@@ -874,6 +874,7 @@ void ConstructSA::run_full_alg() {
     std::cout << "\nSearch Completed to 1\n";
 
     while (!alg_path.empty()) {
+
         // Loop through the path stack, performing the neccessary sort mode.
         uint_least64_t (ConstructSA::*get_class)(uint_least64_t) const;
         bool (ConstructSA::*get_flag)(uint_least64_t) const;
@@ -965,13 +966,39 @@ void ConstructSA::create_flagged_fm_index(std::vector<bool> *lcp_flags,
 
     // First, run through m_SA, alternating LCP flag at the end of each class.
     bool flag = 0;
+    int counter = 0;
+    int avg_counter = 0;
+    int num_classes_counter = 0;
     uint_least64_t prev_class = 0;
     for (uint_least64_t i = 0; i < get_SA_length(); i++) {
         uint_least64_t current_class = m_classes[m_SA[i]];
-        if (current_class != prev_class) { flag = !flag; }
+        if (current_class != prev_class) {
+            flag = !flag;
+            // if ( get_flag_at(current_class) && !get_flag_at(prev_class) ) {
+            //     // Then the termination char has been passed.
+            //     num_classes_counter++;
+            // }
+        }
+        // if ( get_flag_at(current_class) ) {
+        //     // Then the termination char has been passed.
+        //     counter++;
+        //     avg_counter++;
+        // }
+
         (*lcp_flags)[i] = flag;
         prev_class = current_class;
     }
+
+
+    // std::cout << "\n\n" << "$ PASSED COUNTER IS AT " << counter << " OF "
+    //           << get_SA_length()
+    //           << "\n There are " << num_classes_counter
+    //           << " such classes of "
+    //           << m_classes[m_SA[get_SA_length()-1]] << " total. "
+    //           << "\n The average size of these classes is "
+    //           << static_cast<double>(avg_counter)
+    //                         /static_cast<double>(num_classes_counter)
+    //           << "\n\n";
 
     std::cout << "LCP flags written." << "\n--------\n" <<  std::flush;
 
@@ -1059,8 +1086,6 @@ void ConstructSA::print_flagged_fm_index(const std::string SA_file) {
 
 
 
-
-
 void ConstructSA::print_fm_index(const std::string SA_file) {
     std::vector<uint_least64_t> fm_index;
 
@@ -1082,6 +1107,108 @@ void ConstructSA::print_fm_index(const std::string SA_file) {
 
     write_output.close();
 }
+
+
+uint_least64_t ConstructSA::get_compressed_size() {
+
+    // At a length = kmer size, record if term char passed
+    m_term_char_passed.reserve(get_SA_length());
+    for (uint_least64_t i = 0; i < get_SA_length(); i++) {
+        int current_class = m_classes[i];
+        if (get_flag_at(current_class)) {
+            // The term char has been passed
+            m_term_char_passed[i] = 1;
+        } else {
+            m_term_char_passed[i] = 0;
+        }
+    }
+    // Sort once more, for k+1
+    sort_suffix_pairs(true);
+    update_classes(true);
+    std::cout << "Sort completed to " << m_curr_length
+              << std::flush;
+
+
+    // Get compression stats
+    uint_least64_t compressed_length_no_wee_kmers = 0;
+    uint_least64_t compressed_length = 0;
+    uint_least64_t old_compressed_length = 0;
+    uint_least64_t i = 0;
+
+    int current_base = -1;
+    int prev_base = -1;
+    while (i < get_SA_length()) {
+    // RLE
+        current_base = get_prepending_class(i);
+        if (current_base != prev_base) {old_compressed_length++;
+        }
+        prev_base = current_base;
+        i++;
+    }
+
+    std::vector<bool> char_no_wee_kmers = {0, 0, 0, 0, 0};
+
+    int current_class;
+    i=0;
+    while ( i < get_SA_length() ) {
+        // Get next class
+        current_class = m_classes[m_SA[i]];
+
+        // Reset bools.
+        std::vector<bool> char_representation = {0, 0, 0, 0, 0};
+
+        // Iterate through class.
+        int current_base;
+        while (m_classes[m_SA[i]] == current_class) {
+            current_base = get_prepending_class(i);
+            char_representation[current_base] = 1;
+            char_no_wee_kmers[current_base] = 1;
+            i++;
+        }
+
+        bool curr_flag = m_term_char_passed[m_SA[i-1]];
+        bool next_flag=0;
+        if (i<get_SA_length()) {
+            next_flag = m_term_char_passed[m_SA[i]];
+        }
+        // Add the number of represented chars in the BWT to the length.
+        for (int i = 0; i < 5; i++) {
+            compressed_length += char_representation[i];
+            if ( !curr_flag || (curr_flag && !next_flag)) {
+                // if !curr_flag, then the term flag hasn't been passed, so record.  If curr_flag, then term char not passed.  So record iff the next_flag differs.  I.e. if curr_flag=1 and next_flag=0
+                compressed_length_no_wee_kmers
+                                += char_representation[i];
+                // clear bools
+                char_no_wee_kmers[i] = 0;
+            }
+        }
+    }
+
+    std::cout << "\n Compressed BWT length is "
+              << old_compressed_length << " of " << get_SA_length()
+              << " total, or "
+              << (static_cast<double>(old_compressed_length)/
+                        static_cast<double>(get_SA_length()))*100
+              << "%.\n";
+
+    std::cout << "\n Class Bucket Compressed BWT length is "
+              << compressed_length << " of " << get_SA_length()
+              << " total, or "
+              << (static_cast<double>(compressed_length)/
+                        static_cast<double>(get_SA_length()))*100
+              << "%.\n";
+
+    std::cout << "\n No wee k-mers, class Bucket Compressed BWT length is "
+              << compressed_length_no_wee_kmers << " of " << get_SA_length()
+              << " total, or "
+              << (static_cast<double>(compressed_length_no_wee_kmers)/
+                        static_cast<double>(get_SA_length()))*100
+              << "%.\n";
+
+    return compressed_length;
+}
+
+
 
 
 int ConstructSA::convert_base_to_class(char base) const {
@@ -1110,5 +1237,3 @@ char ConstructSA::convert_class_to_base(int char_eq) const {
     }
 }
 
-// Tests:  the resultant constuctSA is sorted to d+1.
-// Within each class (ie LCP flag area), construct SA is sorted to d.

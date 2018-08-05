@@ -23,6 +23,7 @@ class ConstructSA: public ProblemDescription {
     std::vector<uint_least64_t> m_SA;
     std::vector<uint_least64_t> m_classes;
     std::vector<bool> m_flags;
+    std::vector<bool> m_term_char_passed;
     uint_least64_t m_curr_length;
     uint_least64_t num_classes;
 
@@ -161,6 +162,7 @@ class ConstructSA: public ProblemDescription {
     void print_flagged_fm_index(const std::string SA_file);
     void print_fm_index(const std::string SA_file);
 
+    uint_least64_t get_compressed_size();
     std::string create_BWT();
     int convert_base_to_class(char base) const;
     char convert_class_to_base(int char_eq) const;

@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
                 Con_SA.print_fm_index(output_file);
             }
         }
+        Con_SA.get_compressed_size();
     }
 
     std::cout.clear();
