@@ -8,6 +8,8 @@
 * `g++ -std+c++11 -o sim_reads simulate_reads.cpp` then `./sim_reads --help`
 * `g++ -std+c++11 -o reverse_complement reverse_complement_fasta.cpp` then `./reverse_complement --help`
 
+Note: to estimate the compression abilities of EGSACreation, first switch to the CompressionStats branch and subtract one from the intended k-mer size.
+
 ## EGSACreation
 
 Setup: `cd ./EGSACreation`, then `make main clean`
