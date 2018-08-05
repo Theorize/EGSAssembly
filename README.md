@@ -10,7 +10,9 @@
 
 ## EGSACreation
 
-Usage: `cd ./EGSACreation`, then `make main clean` then  ./main [--help] [--verbose] [command] [parameter=value]
+Setup: `cd ./EGSACreation`, then `make main clean`
+
+Usage: ./main [--help] [--verbose] [command] [parameter=value]
 
 Required: A command and a `-fastx_file` is required.
 
@@ -46,6 +48,8 @@ Required: A command and a `-fastx_file` is required.
 
 ## Assembly
 
-Usage: `cd ./Assembly`, then  `make main clean`, then   ./main <ESGA file> <minimum copy number> <maximum copy number> <results folder location>
+Setup: `cd ./Assembly`, then  `make main clean`, then
+
+Useage: ./main [ESGA file] [minimum copy number] [maximum copy number] [results folder location]
 
 Required: An EGSA file created by EGSACreation, with inputs  `-sort_depth` ,   `-precise_depth=1`,    `-include_rc=1`, and   `-output_file`.    
