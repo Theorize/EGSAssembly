@@ -1129,22 +1129,21 @@ uint_least64_t ConstructSA::get_compressed_size() {
               << std::flush;
 
 
-    // Get compression stats
-    uint_least64_t compressed_length_no_wee_kmers = 0;
-    uint_least64_t compressed_length = 0;
-    uint_least64_t old_compressed_length = 0;
-    uint_least64_t i = 0;
-
     int current_base = -1;
     int prev_base = -1;
+    bool curr_flag = 0;
+    bool prev_flag = 0;
     while (i < get_SA_length()) {
     // RLE
+        curr_flag = m_term_char_passed[m_SA[i-1]];
         current_base = get_prepending_class(i);
-        if (current_base != prev_base) {old_compressed_length++;
+        if (current_base != prev_base || curr_flag != prev_flag) {old_compressed_length++;
         }
+        prev_flag = curr_flag;
         prev_base = current_base;
         i++;
     }
+
 
     std::vector<bool> char_no_wee_kmers = {0, 0, 0, 0, 0};
 
@@ -1166,7 +1165,7 @@ uint_least64_t ConstructSA::get_compressed_size() {
             i++;
         }
 
-        bool curr_flag = m_term_char_passed[m_SA[i-1]];
+        curr_flag = m_term_char_passed[m_SA[i-1]];
         bool next_flag=0;
         if (i<get_SA_length()) {
             next_flag = m_term_char_passed[m_SA[i]];
