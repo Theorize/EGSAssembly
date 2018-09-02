@@ -1,3 +1,12 @@
+This work has been developed as part of a thesis in Genome Assembly at the University of Copenhagen, completed in August 2018.  The written body of work for this thesis will be made available in due course.
+
+## Thesis Abstract
+Prevailing de novo assembly paradigms are surveyed and a brief technical introduction to enhanced generalised suffix arrays (EGSAs) is provided, with a focus on the capabilities of the Burrows-Wheeler Transform. Following a review of current pattern matching algorithms on EGSAs, an extension is provided to enable reduction of the matched pattern. This flexibility sets the assembler apart from it’s peers. A hybrid between the simplicity of de Bruijn graphs and the informed overlap process of OLC assemblers is thus achieved. Subsequently, current compression methods are extended to summarily encode the EGSA, which is truncated prior to use. An implementation of this data structure and EGSA construction is carried out, alongside a minimally viable assembler. Real and simulated sequenced genomes are ran through this pipeline. The results and theory is then discussed in the context of the field and future research avenues.
+
+## Available Code
+Within this repository, code used to provide an overview of sequencing data, to generate truncated EGSAs, and to assemble sequencing data into a series of contigs (overlapping sections of DNA that represent a continuous region of the genome, as best determined from the sequencing data) is provided. `EGSACreation` achieves the former two points, whilst `Assembly` achieves the latter.
+
+
 ## Compilation
 `cd` into the Assembly or EGSACreation folders and run:
 * `make main`  to create the ./main executable
